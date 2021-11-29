@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dynamicrecyclerview.adapter.RecyclerAdapter
 import com.example.dynamicrecyclerview.database.MemoDatabase
+import com.example.dynamicrecyclerview.databinding.ActivityMainBinding
 import com.example.dynamicrecyclerview.entity.Memo
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,13 +24,29 @@ class MainActivity : AppCompatActivity() {
     private val paint: Paint = Paint()
     private var db: MemoDatabase? = null
 
+    // 전역 변수로 바인딩 객체 선언
+    private var mBinding: ActivityMainBinding? = null
+    //매번 null 체크를 할 필요 없이 편의성을 위해 바인딩 변수 재 선언
+    private val binding get() = mBinding!!
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    //    setContentView(R.layout.activity_main)
+
+        // 자동 생성된 뷰 바인딩 클래스에서의 inflate라는 메서드를 활용
+        // 액티비티에서 사용할 바인딩 클래스의 인스턴스 생성
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+
+        // getRoot 메서드로 레이아웃 내부의 최상위 위치 뷰의
+        // 인스턴스를 활용하여 생성된 뷰를 액티비티에 표시 합니다.
+        setContentView(binding.root)
 
         initSwipe()
 
-        plus_btn.setOnClickListener {
+        // binding 바인딩 변수를 활용하여 마음 껏 xml 파일 내의 뷰 id 접근이 가능
+        // 뷰 id도 파스칼케이스 + 카멜케이스의 네이밍규칙 적용으로 인해서 plus_btn -> plusBtn 로 자동 변환
+        binding.plusBtn.setOnClickListener {
             Log.d(TAG, "추가 버튼 클릭")
             // title 입력 다이얼로그를 호출한다.
             // title 입력하여 리사이클러뷰 addItem
@@ -60,16 +76,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         db = MemoDatabase.getInstance(this)
-        rv_view.setHasFixedSize(true)
+        binding.rvView.setHasFixedSize(true)
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this) //list 형으로
-        rv_view.layoutManager = layoutManager
+        binding.rvView.layoutManager = layoutManager
 
-        //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨)
+        //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
         db!!.memoDao().getAll().observe(this, Observer{
             // update UI
             adapter = RecyclerAdapter(db!!,it)
-            rv_view.adapter = adapter
+            binding.rvView.adapter = adapter
         })
+
+
+
+    }
+
+    // 액티비티가 파괴될 때
+    override fun onDestroy() {
+        super.onDestroy()
+        // onDestroy 에서 binding class 인스턴스 참조를 정리해주어야 한다.
+        mBinding = null
+        super.onDestroy()
     }
 
     private fun initSwipe() {
@@ -152,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(rv_view)
+        itemTouchHelper.attachToRecyclerView(binding.rvView)
 
     }
 

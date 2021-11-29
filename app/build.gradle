@@ -26,13 +26,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures { // 뷰 바인딩 활성화
+        viewBinding true }
+
 }
 
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
+//곧 지원 중단, view binding 필요성!
+//apply plugin: 'kotlin-android-extensions'
 
 
 dependencies {
