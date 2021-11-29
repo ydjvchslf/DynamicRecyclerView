@@ -6,7 +6,7 @@ import com.example.dynamicrecyclerview.entity.Memo
 
 @Dao
 interface MemoDao{
-    @Query("SELECT * FROM memo ORDER BY id DESC")
+    @Query("SELECT * FROM memo ORDER BY id DESC") //내림차순
     fun getAll(): LiveData<List<Memo>> //Observer로 변화를 감지할 수 있습니다. 전체 데이터에 변화가 생길때 LiveData Callback을 실행하여 UI를 업데이트
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

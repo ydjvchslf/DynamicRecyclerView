@@ -22,7 +22,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:text="제목"
+                android:text="@{viewmode.title}"
                 android:textSize="18sp"/>
 
             <EditText

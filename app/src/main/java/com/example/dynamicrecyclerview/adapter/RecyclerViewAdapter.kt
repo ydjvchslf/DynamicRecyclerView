@@ -46,13 +46,16 @@ class RecyclerAdapter(val db: MemoDatabase, var items: List<Memo>?)
 
             index = position
 
+            //itemView.title.setText(memo.title)
+
             itemView.title.text = memo.title
+
             Log.d(TAG, "[RecyclerViewAdapter] : Recycler title 세팅 => ${memo.title} ")
 
             itemView.content.setText(memo.content)
             Log.d(TAG, "[RecyclerViewAdapter] : 입력받은 content 를 memo.content 로 세팅 => ${memo.content} ")
 
-            //itemView.content.text = memo.content // memo에 title만 세팅 되어있는 상태라 error
+            //itemView.content.text = memo.content // memo.content가 null이어서 error라 생각했는데, nono, EditText는 getText, setText 다름
 
             itemView.save_btn.setOnClickListener {
                 Log.d(TAG, "[RecyclerViewAdapter] : 저장 버튼 클릭")
