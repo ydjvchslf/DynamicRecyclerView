@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ import com.example.dynamicrecyclerview.adapter.RecyclerAdapter
 import com.example.dynamicrecyclerview.database.MemoDatabase
 import com.example.dynamicrecyclerview.databinding.ActivityMainBinding
 import com.example.dynamicrecyclerview.entity.Memo
+import com.example.dynamicrecyclerview.viewModel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         // getRoot 메서드로 레이아웃 내부의 최상위 위치 뷰의
         // 인스턴스를 활용하여 생성된 뷰를 액티비티에 표시 합니다.
         setContentView(binding.root)
+
+        val viewModel = ViewModelProvider.of(this).[MainViewModel::class.java]
 
         initSwipe()
 
@@ -75,20 +79,18 @@ class MainActivity : AppCompatActivity() {
             builder.show()
         }
 
-        db = MemoDatabase.getInstance(this)
+//        db = MemoDatabase.getInstance(this)
+
         binding.rvView.setHasFixedSize(true)
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this) //list 형으로
         binding.rvView.layoutManager = layoutManager
 
         //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
-        db!!.memoDao().getAll().observe(this, Observer{
-            // update UI
-            adapter = RecyclerAdapter(db!!,it)
-            binding.rvView.adapter = adapter
-        })
-
-
-
+//        db!!.memoDao().getAll().observe(this, Observer{
+//            // update UI
+//            adapter = RecyclerAdapter(db!!,it)
+//            binding.rvView.adapter = adapter
+//        })
     }
 
     // 액티비티가 파괴될 때
@@ -165,12 +167,6 @@ class MainActivity : AppCompatActivity() {
                             itemView.bottom.toFloat()
                         )
                         c.drawRect(background, paint)
-                        /*
-                         * icon 추가할 수 있음.
-                         */
-                        //icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon_png); //vector 불가!
-                        // RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
-                        //c.drawBitmap(icon, null, icon_dest, p);
                     }
                 }
 
