@@ -1,42 +1,52 @@
 package com.example.dynamicrecyclerview.viewModel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import com.example.dynamicrecyclerview.adapter.RecyclerAdapter
+import android.content.Context
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import com.example.dynamicrecyclerview.MainActivity
 import com.example.dynamicrecyclerview.database.MemoDatabase
-import com.example.dynamicrecyclerview.databinding.ActivityMainBinding
+import com.example.dynamicrecyclerview.entity.Memo
 
-class MainViewModel(application: Application) : AndroidViewModel(application), LifecycleOwner {
+// 데이터의 변경
+// 뷰모델은 데이터의 변경사항을 알려주는 라이브 데이터를 가지고 있
+class MainViewModel : ViewModel() {
 
     companion object{
         const val TAG: String = "LOG"
     }
 
-    private var adapter: RecyclerAdapter? = null
     private var db: MemoDatabase? = null
 
-    // 전역 변수로 바인딩 객체 선언
-    private var mBinding: ActivityMainBinding? = null
-    //매번 null 체크를 할 필요 없이 편의성을 위해 바인딩 변수 재 선언
-    private val binding get() = mBinding!!
+    // 뮤터블 라이브 데이터 - 수정 가능한 녀석
+    // 라이브 데이터 - 읽기전용, 수정 불가
 
-    fun updateUi(){
-
-    db = MemoDatabase.getInstance(this)
-
-    //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
-        db!!.memoDao().getAll().observe(this, Observer{
-            // update UI
-            adapter = RecyclerAdapter(db!!,it)
-            binding.rvView.adapter = adapter
-        })
+    //초기값 설정
+    init {
+        Log.d(TAG, "[MainViewModel] - 생성자 호출")
     }
 
-    override fun getLifecycle(): Lifecycle {
-        TODO("Not yet implemented")
+    //db get instance
+    fun initialize(context: Context){
+        db = MemoDatabase.getInstance(context as MainActivity)
+    }
+
+    fun insertMemo(editText: String){
+
+        Thread(Runnable { // view model 로직 분리 // view쪽 앤데.. 변수 받아서 넘겨줘야 하나?
+            db!!.memoDao().insert(Memo(null, editText, null))
+
+            Log.d(TAG, "[MainViewModel] - insertMemo() 호출, memo.title = $editText")
+        }).start()
+
+    }
+
+    fun deleteMemo(memo: Memo){
+        db?.memoDao()?.delete(memo)
+    }
+
+    // ui update -> 어떻게 적용할까
+    fun updateUi(){
+        db?.memoDao()?.getAll()
     }
 
 }

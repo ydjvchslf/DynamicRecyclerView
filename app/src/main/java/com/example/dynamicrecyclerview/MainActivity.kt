@@ -17,6 +17,7 @@ import com.example.dynamicrecyclerview.database.MemoDatabase
 import com.example.dynamicrecyclerview.databinding.ActivityMainBinding
 import com.example.dynamicrecyclerview.entity.Memo
 import com.example.dynamicrecyclerview.viewModel.MainViewModel
+import android.content.Context as contecx
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,13 +25,14 @@ class MainActivity : AppCompatActivity() {
 
     private var adapter: RecyclerAdapter? = null
     private val paint: Paint = Paint()
-    private var db: MemoDatabase? = null
 
     // 전역 변수로 바인딩 객체 선언
     private var mBinding: ActivityMainBinding? = null
     //매번 null 체크를 할 필요 없이 편의성을 위해 바인딩 변수 재 선언
     private val binding get() = mBinding!!
 
+    //view model 가져오기
+    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +46,11 @@ class MainActivity : AppCompatActivity() {
         // 인스턴스를 활용하여 생성된 뷰를 액티비티에 표시 합니다.
         setContentView(binding.root)
 
-        val viewModel = ViewModelProvider.of(this).[MainViewModel::class.java]
+        //view model 가져오기
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
+        //context 넣어서 view model로 넘겨주기
+        viewModel.initialize(context = this)
 
         initSwipe()
 
@@ -65,10 +71,10 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "입력 버튼 클릭")
                 //제목 입력, DB추가
                 if (!editText.text.toString().isEmpty()) {
-                    Thread(Runnable {
-                        db!!.memoDao().insert(Memo(null, editText.text.toString(), null))
-                        Log.d(TAG, "memoDao.insert() 실행, memo.title = ${editText.text.toString()}")
-                    }).start()
+
+                    Log.d(TAG, "[MainActivity] - viewModel 연결")
+
+                    viewModel.insertMemo(editText.text.toString())
                 }
             }
             builder.setNegativeButton(
@@ -77,20 +83,28 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "취소 버튼 클릭")
             }
             builder.show()
+
+            binding.rvView.setHasFixedSize(true)
+            val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this) //list 형으로
+            binding.rvView.layoutManager = layoutManager
+
+
+            //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
+            //view model 어떻게 적용할까
+
+            var db: MemoDatabase? = null
+            viewModel.initialize(context = this)
+
+            db?.memoDao()?.getAll()?.observe(this, Observer {
+
+                Log.d(TAG, "[MainActivity] - adapter 장착 부분인가")
+
+                // update UI
+                adapter = RecyclerAdapter(db, it)
+                binding.rvView.adapter = adapter
+            })
+
         }
-
-//        db = MemoDatabase.getInstance(this)
-
-        binding.rvView.setHasFixedSize(true)
-        val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this) //list 형으로
-        binding.rvView.layoutManager = layoutManager
-
-        //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
-//        db!!.memoDao().getAll().observe(this, Observer{
-//            // update UI
-//            adapter = RecyclerAdapter(db!!,it)
-//            binding.rvView.adapter = adapter
-//        })
     }
 
     // 액티비티가 파괴될 때
@@ -121,8 +135,8 @@ class MainActivity : AppCompatActivity() {
 
                 val position = viewHolder.adapterPosition
                 if (direction == ItemTouchHelper.LEFT) {
-                    Thread{
-                        adapter?.getItem()?.get(position)?.let { db!!.memoDao().delete(it) }
+                    Thread{                                     // View Model 로직 분리
+                        adapter?.getItem()?.get(position)?.let { viewModel.deleteMemo(it) }
                     }.start()
                 } else {
                     //오른쪽으로 밀었을때.

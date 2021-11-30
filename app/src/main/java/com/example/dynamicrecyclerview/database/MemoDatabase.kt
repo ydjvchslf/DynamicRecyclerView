@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.dynamicrecyclerview.MainActivity
 import com.example.dynamicrecyclerview.dao.MemoDao
 import com.example.dynamicrecyclerview.entity.Memo
 import com.example.dynamicrecyclerview.viewModel.MainViewModel
@@ -14,7 +15,7 @@ abstract class MemoDatabase: RoomDatabase(){
 
     companion object{
         private var INSTANCE: MemoDatabase? = null
-        fun getInstance(context: MainViewModel): MemoDatabase{
+        fun getInstance(context: MainActivity): MemoDatabase{
             if (INSTANCE == null){
                 INSTANCE = Room.databaseBuilder(
                     context,
