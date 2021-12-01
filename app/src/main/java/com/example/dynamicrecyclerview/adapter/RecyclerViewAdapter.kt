@@ -22,6 +22,7 @@ class RecyclerAdapter(val db: MemoDatabase, var items: List<Memo>?)
 
     //view binding 적용하여 수정
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        Log.d(TAG, "RecyclerAdapter - onCreateViewHolder() 호출")
 //            val v: View = LayoutInflater.from(parent.context)
 //            .inflate(R.layout.recyclerview_item, parent,false)
             mContext = parent.context

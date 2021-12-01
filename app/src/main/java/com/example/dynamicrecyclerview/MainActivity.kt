@@ -84,11 +84,6 @@ class MainActivity : AppCompatActivity() {
             }
             builder.show()
 
-            binding.rvView.setHasFixedSize(true)
-            val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this) //list 형으로
-            binding.rvView.layoutManager = layoutManager
-
-
             //UI 갱신 (라이브데이터 Observer 이용, 해당 디비값이 변화가생기면 실행됨) // owner: lifecycle주관하는 -> 여기선 MainActivity
             //view model 어떻게 적용할까
 
@@ -100,8 +95,11 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "[MainActivity] - adapter 장착 부분인가")
 
                 // update UI
+                binding.rvView.apply {
+                setHasFixedSize(true)
+                layoutManager= LinearLayoutManager(this@MainActivity)
                 adapter = RecyclerAdapter(db, it)
-                binding.rvView.adapter = adapter
+                }
             })
 
         }
